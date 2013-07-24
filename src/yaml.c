@@ -46,6 +46,7 @@ mrb_yaml_open(mrb_state *mrb, mrb_value self)
 	FILE *file;
 	char *filename;
 	yaml_node_t *root;
+	mrb_value result;
 	
 	/* Extract arguments */
 	mrb_get_args(mrb, "z", &filename);
@@ -66,9 +67,16 @@ mrb_yaml_open(mrb_state *mrb, mrb_value self)
 	/* Load the document */
 	yaml_parser_load(&parser, &document);
 	
+	/* Error handling */
+	if (parser.error != YAML_NO_ERROR)
+	{
+		mrb_raise(mrb, E_RUNTIME_ERROR, parser.problem);
+		return mrb_nil_value();
+	}
+	
 	/* Convert the root node to an MRuby value */
 	root = yaml_document_get_root_node(&document);
-	mrb_value result = yaml_node_to_mrb(mrb, &document, root);
+	result = yaml_node_to_mrb(mrb, &document, root);
 	
 	/* Clean up */
 	yaml_document_delete(&document);
@@ -86,20 +94,29 @@ yaml_node_to_mrb(mrb_state *mrb,
 	switch (node->type)
 	{
 		case YAML_SCALAR_NODE:
-			return mrb_str_new(mrb, node->data.scalar.value,
+		{
+			/* Every scalar is a string */
+			mrb_value result = mrb_str_new(mrb, node->data.scalar.value,
 				node->data.scalar.length);
+			return result;
+		}
 		
 		case YAML_SEQUENCE_NODE:
 		{
+			/* Sequences are arrays in Ruby */
 			mrb_value result = mrb_ary_new(mrb);
+			yaml_node_item_t *item;
 			
-			for (yaml_node_item_t *item = node->data.sequence.items.start;
+			int ai = mrb_gc_arena_save(mrb);
+			
+			for (item = node->data.sequence.items.start;
 				item < node->data.sequence.items.top; item++)
 			{
 				yaml_node_t *child_node = yaml_document_get_node(document, *item);
 				mrb_value child = yaml_node_to_mrb(mrb, document, child_node);
 				
 				mrb_ary_push(mrb, result, child);
+				mrb_gc_arena_restore(mrb, ai);
 			}
 			
 			return result;
@@ -107,11 +124,15 @@ yaml_node_to_mrb(mrb_state *mrb,
 		
 		case YAML_MAPPING_NODE:
 		{
+			/* Mappings are hashes in Ruby */
 			mrb_value result = mrb_hash_new(mrb);
 			yaml_node_t *key_node;
 			yaml_node_t *value_node;
+			yaml_node_pair_t *pair;
 			
-			for (yaml_node_pair_t *pair = node->data.mapping.pairs.start;
+			int ai = mrb_gc_arena_save(mrb);
+			
+			for (pair = node->data.mapping.pairs.start;
 				pair < node->data.mapping.pairs.top; pair++)
 			{
 				key_node = yaml_document_get_node(document, pair->key);
@@ -121,6 +142,7 @@ yaml_node_to_mrb(mrb_state *mrb,
 				mrb_value value = yaml_node_to_mrb(mrb, document, value_node);
 				
 				mrb_hash_set(mrb, result, key, value);
+				mrb_gc_arena_restore(mrb, ai);
 			}
 			
 			return result;
