@@ -26,30 +26,6 @@ static int yaml_mrb_to_node(mrb_state *mrb,
 	yaml_document_t *document, mrb_value value);
 
 
-void
-mruby_test()
-{
-	mrb_state *mrb = mrb_open();
-	mrb_mruby_yaml_gem_init(mrb);
-	
-	/* Launch the test script */
-	FILE *file = fopen("test.rb", "r");
-	mrb_load_file(mrb, file);
-	
-	mrb_mruby_yaml_gem_final(mrb);
-	mrb_close(mrb);
-}
-
-
-int
-main(int argc, char *argv[])
-{
-	mruby_test();
-	
-	return EXIT_SUCCESS;
-}
-
-
 mrb_value
 mrb_yaml_load(mrb_state *mrb, mrb_value self)
 {
@@ -66,7 +42,7 @@ mrb_yaml_load(mrb_state *mrb, mrb_value self)
 	/* Initialize the YAML parser */
 	yaml_parser_initialize(&parser);
 	yaml_parser_set_input_string(&parser,
-		RSTRING_PTR(yaml_str), RSTRING_LEN(yaml_str));
+		(unsigned char *) RSTRING_PTR(yaml_str), RSTRING_LEN(yaml_str));
 	
 	/* Load the document */
 	yaml_parser_load(&parser, &document);
@@ -129,7 +105,7 @@ mrb_yaml_dump(mrb_state *mrb, mrb_value self)
 int yaml_write(void *data, unsigned char *buffer, size_t size)
 {
 	yaml_write_data_t *write_data = (yaml_write_data_t *) data;
-	mrb_str_buf_cat(write_data->mrb, write_data->str, buffer, size);
+	mrb_str_buf_cat(write_data->mrb, write_data->str, (char *) buffer, size);
 	return 1;
 }
 
@@ -143,7 +119,8 @@ yaml_node_to_mrb(mrb_state *mrb,
 		case YAML_SCALAR_NODE:
 		{
 			/* Every scalar is a string */
-			mrb_value result = mrb_str_new(mrb, node->data.scalar.value,
+			mrb_value result = mrb_str_new(mrb,
+				(char *) node->data.scalar.value,
 				node->data.scalar.length);
 			return result;
 		}
@@ -271,7 +248,7 @@ int yaml_mrb_to_node(mrb_state *mrb,
 		
 		case MRB_TT_STRING:
 		{
-			yaml_char_t *value_chars = RSTRING_PTR(value);
+			yaml_char_t *value_chars = (unsigned char *) RSTRING_PTR(value);
 			node = yaml_document_add_scalar(document, NULL,
 				value_chars, RSTRING_LEN(value), YAML_ANY_SCALAR_STYLE);
 			break;
