@@ -17,12 +17,12 @@ typedef struct yaml_write_data_t
 	mrb_value str;
 } yaml_write_data_t;
 
-int yaml_write(void *data, unsigned char *buffer, size_t size);
+int yaml_write_handler(void *data, unsigned char *buffer, size_t size);
+static void raise_parser_problem(mrb_state *mrb, yaml_parser_t *parser);
 
-
-static mrb_value yaml_node_to_mrb(mrb_state *mrb,
+static mrb_value node_to_value(mrb_state *mrb,
 	yaml_document_t *document, yaml_node_t *node);
-static int yaml_mrb_to_node(mrb_state *mrb,
+static int value_to_node(mrb_state *mrb,
 	yaml_document_t *document, mrb_value value);
 
 
@@ -50,13 +50,13 @@ mrb_yaml_load(mrb_state *mrb, mrb_value self)
 	/* Error handling */
 	if (parser.error != YAML_NO_ERROR)
 	{
-		mrb_raise(mrb, E_RUNTIME_ERROR, parser.problem);
+		raise_parser_problem(mrb, &parser);
 		return mrb_nil_value();
 	}
 	
 	/* Convert the root node to an MRuby value */
 	root = yaml_document_get_root_node(&document);
-	result = yaml_node_to_mrb(mrb, &document, root);
+	result = node_to_value(mrb, &document, root);
 	
 	/* Clean up */
 	yaml_document_delete(&document);
@@ -80,14 +80,14 @@ mrb_yaml_dump(mrb_state *mrb, mrb_value self)
 	
 	/* Build the document */
 	yaml_document_initialize(&document, NULL, NULL, NULL, 0, 0);
-	yaml_mrb_to_node(mrb, &document, root);
+	value_to_node(mrb, &document, root);
 	
 	/* Initialize the emitter */
 	yaml_emitter_initialize(&emitter);
 	
 	write_data.mrb = mrb;
 	write_data.str = mrb_str_new(mrb, NULL, 0);
-	yaml_emitter_set_output(&emitter, &yaml_write, &write_data);
+	yaml_emitter_set_output(&emitter, &yaml_write_handler, &write_data);
 	
 	/* Dump the document */
 	yaml_emitter_open(&emitter);
@@ -102,7 +102,7 @@ mrb_yaml_dump(mrb_state *mrb, mrb_value self)
 }
 
 
-int yaml_write(void *data, unsigned char *buffer, size_t size)
+int yaml_write_handler(void *data, unsigned char *buffer, size_t size)
 {
 	yaml_write_data_t *write_data = (yaml_write_data_t *) data;
 	mrb_str_buf_cat(write_data->mrb, write_data->str, (char *) buffer, size);
@@ -110,8 +110,19 @@ int yaml_write(void *data, unsigned char *buffer, size_t size)
 }
 
 
+void raise_parser_problem(mrb_state *mrb, yaml_parser_t *parser)
+{
+	mrb_value problem_line = mrb_fixnum_value(parser->problem_mark.line);
+	mrb_value problem_col = mrb_fixnum_value(parser->problem_mark.column);
+	mrb_value problem_str = mrb_str_new_cstr(mrb, parser->problem);
+	
+	mrb_raisef(mrb, E_RUNTIME_ERROR, "%S at line %S column %S",
+		problem_str, problem_line, problem_col);
+}
+
+
 mrb_value
-yaml_node_to_mrb(mrb_state *mrb,
+node_to_value(mrb_state *mrb,
 	yaml_document_t *document, yaml_node_t *node)
 {
 	switch (node->type)
@@ -137,7 +148,7 @@ yaml_node_to_mrb(mrb_state *mrb,
 				item < node->data.sequence.items.top; item++)
 			{
 				yaml_node_t *child_node = yaml_document_get_node(document, *item);
-				mrb_value child = yaml_node_to_mrb(mrb, document, child_node);
+				mrb_value child = node_to_value(mrb, document, child_node);
 				
 				mrb_ary_push(mrb, result, child);
 				mrb_gc_arena_restore(mrb, ai);
@@ -162,8 +173,8 @@ yaml_node_to_mrb(mrb_state *mrb,
 				key_node = yaml_document_get_node(document, pair->key);
 				value_node = yaml_document_get_node(document, pair->value);
 				
-				mrb_value key = yaml_node_to_mrb(mrb, document, key_node);
-				mrb_value value = yaml_node_to_mrb(mrb, document, value_node);
+				mrb_value key = node_to_value(mrb, document, key_node);
+				mrb_value value = node_to_value(mrb, document, value_node);
 				
 				mrb_hash_set(mrb, result, key, value);
 				mrb_gc_arena_restore(mrb, ai);
@@ -178,7 +189,7 @@ yaml_node_to_mrb(mrb_state *mrb,
 }
 
 
-int yaml_mrb_to_node(mrb_state *mrb,
+int value_to_node(mrb_state *mrb,
 	yaml_document_t *document, mrb_value value)
 {
 	int node;
@@ -197,7 +208,7 @@ int yaml_mrb_to_node(mrb_state *mrb,
 			for (i = 0; i < len; i++)
 			{
 				mrb_value child = mrb_ary_ref(mrb, value, i);
-				int child_node = yaml_mrb_to_node(mrb, document, child);
+				int child_node = value_to_node(mrb, document, child);
 				
 				/* Add the child to the sequence */
 				yaml_document_append_sequence_item(document, node, child_node);
@@ -226,8 +237,8 @@ int yaml_mrb_to_node(mrb_state *mrb,
 				mrb_value key = mrb_ary_ref(mrb, keys, i);
 				mrb_value child = mrb_hash_get(mrb, value, key);
 				
-				int key_node = yaml_mrb_to_node(mrb, document, key);
-				int child_node = yaml_mrb_to_node(mrb, document, child);
+				int key_node = value_to_node(mrb, document, key);
+				int child_node = value_to_node(mrb, document, child);
 				
 				/* Add the key/value pair to the mapping */
 				yaml_document_append_mapping_pair(document, node,
