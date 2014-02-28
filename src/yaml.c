@@ -164,7 +164,8 @@ node_to_value(mrb_state *mrb,
 			yaml_node_t *key_node;
 			yaml_node_t *value_node;
 			yaml_node_pair_t *pair;
-			
+			mrb_value key, value;
+      
 			int ai = mrb_gc_arena_save(mrb);
 			
 			for (pair = node->data.mapping.pairs.start;
@@ -173,8 +174,8 @@ node_to_value(mrb_state *mrb,
 				key_node = yaml_document_get_node(document, pair->key);
 				value_node = yaml_document_get_node(document, pair->value);
 				
-				mrb_value key = node_to_value(mrb, document, key_node);
-				mrb_value value = node_to_value(mrb, document, value_node);
+				key = node_to_value(mrb, document, key_node);
+				value = node_to_value(mrb, document, value_node);
 				
 				mrb_hash_set(mrb, result, key, value);
 				mrb_gc_arena_restore(mrb, ai);
