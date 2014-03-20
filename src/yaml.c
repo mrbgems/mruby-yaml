@@ -139,17 +139,19 @@ node_to_value(mrb_state *mrb,
     {
       double dd;
       long long ll;
-      char *str;
+      char *str, *pEnd;
       
       /* check if it is a Fixnum */
       str = (char *) node->data.scalar.value;
-      ll = strtoll(str, NULL, 0);
-      if (errno != EINVAL && strchr(str, '.') == NULL)
+      ll = strtoll(str, &pEnd, 0);
+      if (errno != EINVAL && 
+        strchr(str, '.') == NULL &&
+        pEnd[0] == '\0')
         return mrb_fixnum_value(ll);
       
       /* Check if it is a Float*/
-      dd = strtold(str, NULL);
-      if (errno != EINVAL)
+      dd = strtold(str, &pEnd);
+      if (errno != EINVAL && pEnd[0] == '\0')
         return mrb_float_value(mrb, dd);
       
       /* Every scalar is a String */      
