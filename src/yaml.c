@@ -6,11 +6,14 @@
 #include <mruby/string.h>
 #include <mruby/array.h>
 #include <mruby/hash.h>
-#include <inttypes.h>
 #include <errno.h>
 
 #if defined(_MSC_VER)
+#include <stdlib.h>
 #define strtoll _strtoi64
+#define strtold strtod
+#else
+#include <inttypes.h>
 #endif
 
 void mrb_mruby_yaml_gem_init(mrb_state *mrb);
@@ -134,22 +137,25 @@ node_to_value(mrb_state *mrb,
   {
     case YAML_SCALAR_NODE:
     {
+      double dd;
+      long long ll;
+      char *str;
+      
       /* check if it is a Fixnum */
-      char* str = (char *) node->data.scalar.value;
-      long long ll = strtoll(str, NULL, 0);
+      str = (char *) node->data.scalar.value;
+      ll = strtoll(str, NULL, 0);
       if (errno != EINVAL && strchr(str, '.') == NULL)
         return mrb_fixnum_value(ll);
       
       /* Check if it is a Float*/
-      double dd = strtold(str, NULL);
+      dd = strtold(str, NULL);
       if (errno != EINVAL)
         return mrb_float_value(mrb, dd);
       
       /* Every scalar is a String */      
-      mrb_value result = mrb_str_new(mrb,
+      return mrb_str_new(mrb,
         str,
         node->data.scalar.length);
-      return result;
     }
     
     case YAML_SEQUENCE_NODE:
