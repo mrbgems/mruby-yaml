@@ -6,6 +6,7 @@
 #include <mruby/string.h>
 #include <mruby/array.h>
 #include <mruby/hash.h>
+#include <mruby/value.h>
 #include <errno.h>
 
 #if defined(_MSC_VER)
@@ -140,6 +141,7 @@ node_to_value(mrb_state *mrb,
       double dd;
       long long ll;
       char *str, *pEnd;
+      errno = 0;
       
       /* check if it is a Fixnum */
       str = (char *) node->data.scalar.value;
@@ -154,10 +156,11 @@ node_to_value(mrb_state *mrb,
       if (errno != EINVAL && pEnd[0] == '\0')
         return mrb_float_value(mrb, dd);
       
+      if (str[0] == ':')
+        return mrb_symbol_value(mrb_intern_cstr(mrb, str + 1));
+      
       /* Every scalar is a String */      
-      return mrb_str_new(mrb,
-        str,
-        node->data.scalar.length);
+      return mrb_str_new(mrb, str, node->data.scalar.length);
     }
     
     case YAML_SEQUENCE_NODE:
@@ -276,8 +279,17 @@ int value_to_node(mrb_state *mrb,
     
     default:
     {
-      /* Equivalent to `obj = obj#to_s` */
-      value = mrb_obj_as_string(mrb, value);
+      /* Catch Symbols */
+      if (mrb_type(value) == MRB_TT_SYMBOL) {
+        value = mrb_str_plus(mrb,
+          mrb_str_new_cstr(mrb, ":"), 
+          mrb_obj_as_string(mrb, value)
+        );
+      }
+      else {
+        /* Equivalent to `obj = obj#to_s` */
+        value = mrb_obj_as_string(mrb, value);
+      }
       
       /* Fallthrough */
     }
