@@ -11,6 +11,7 @@
 
 #if defined(_MSC_VER)
 #include <stdlib.h>
+#include <string.h>
 #define strtoll _strtoi64
 #define strtold strtod
 #else
@@ -140,11 +141,12 @@ node_to_value(mrb_state *mrb,
     {
       double dd;
       long long ll;
-      char *str, *pEnd;
+      char *pEnd;
+      char *str  = (char *) node->data.scalar.value;
+      int length = node->data.scalar.length;
       errno = 0;
       
       /* check if it is a Fixnum */
-      str = (char *) node->data.scalar.value;
       ll = strtoll(str, &pEnd, 0);
       if (errno != EINVAL && 
         strchr(str, '.') == NULL &&
@@ -156,11 +158,16 @@ node_to_value(mrb_state *mrb,
       if (errno != EINVAL && pEnd[0] == '\0')
         return mrb_float_value(mrb, dd);
       
+      /* Check if it is a Symbol */
       if (str[0] == ':')
         return mrb_symbol_value(mrb_intern_cstr(mrb, str + 1));
       
+      /* Check if it is a Range */
+      if (strstr(str, "..") != NULL)
+        return mrb_load_nstring(mrb, str, length);
+      
       /* Every scalar is a String */      
-      return mrb_str_new(mrb, str, node->data.scalar.length);
+      return mrb_str_new(mrb, str, length);
     }
     
     case YAML_SEQUENCE_NODE:
