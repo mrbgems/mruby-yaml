@@ -6,16 +6,11 @@
 #include <mruby/string.h>
 #include <mruby/array.h>
 #include <mruby/hash.h>
-#include <mruby/value.h>
+#include <inttypes.h>
 #include <errno.h>
 
 #if defined(_MSC_VER)
-#include <stdlib.h>
-#include <string.h>
 #define strtoll _strtoi64
-#define strtold strtod
-#else
-#include <inttypes.h>
 #endif
 
 void mrb_mruby_yaml_gem_init(mrb_state *mrb);
@@ -139,35 +134,20 @@ node_to_value(mrb_state *mrb,
   {
     case YAML_SCALAR_NODE:
     {
-      double dd;
-      long long ll;
-      char *pEnd;
-      char *str  = (char *) node->data.scalar.value;
-      int length = node->data.scalar.length;
-      errno = 0;
+      char *str = (char *) node->data.scalar.value;
       
       /* check if it is a Fixnum */
-      ll = strtoll(str, &pEnd, 0);
-      if (errno != EINVAL && 
-        strchr(str, '.') == NULL &&
-        pEnd[0] == '\0')
+      long long ll = strtoll(str, NULL, 0);
+      if (errno != EINVAL)
         return mrb_fixnum_value(ll);
       
-      /* Check if it is a Float*/
-      dd = strtold(str, &pEnd);
-      if (errno != EINVAL && pEnd[0] == '\0')
+      /* Check if it is a Float */
+      double dd = strtold(str, NULL);
+      if (errno != EINVAL)
         return mrb_float_value(mrb, dd);
       
-      /* Check if it is a Symbol */
-      if (str[0] == ':')
-        return mrb_symbol_value(mrb_intern_cstr(mrb, str + 1));
-      
-      /* Check if it is a Range */
-      if (strstr(str, "..") != NULL)
-        return mrb_load_nstring(mrb, str, length);
-      
-      /* Every scalar is a String */      
-      return mrb_str_new(mrb, str, length);
+      /* Otherwise it is a String */      
+      return mrb_str_new(mrb, str, node->data.scalar.length);
     }
     
     case YAML_SEQUENCE_NODE:
@@ -286,17 +266,8 @@ int value_to_node(mrb_state *mrb,
     
     default:
     {
-      /* Catch Symbols */
-      if (mrb_type(value) == MRB_TT_SYMBOL) {
-        value = mrb_str_plus(mrb,
-          mrb_str_new_cstr(mrb, ":"), 
-          mrb_obj_as_string(mrb, value)
-        );
-      }
-      else {
-        /* Equivalent to `obj = obj#to_s` */
-        value = mrb_obj_as_string(mrb, value);
-      }
+      /* Equivalent to `obj = obj#to_s` */
+      value = mrb_obj_as_string(mrb, value);
       
       /* Fallthrough */
     }
