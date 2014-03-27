@@ -3,6 +3,10 @@
 
 assert('load scalar') do
 	YAML.load('foo') == 'foo'
+	# Test scalar-to-number conversion
+	YAML.load('5') == 5
+	YAML.load('5.5') == 5.5
+	YAML.load('39478539846598374659') == 39478539846598374659
 end
 
 assert('load sequence') do
@@ -17,7 +21,7 @@ end
 
 assert('load combo') do
 	actual = YAML.load("foo: [1, 2, 3]\nbar: baz")
-	expected = {'foo' => ['1', '2', '3'], 'bar' => 'baz'}
+	expected = {'foo' => [1, 2, 3], 'bar' => 'baz'}
 	actual == expected
 end
 
@@ -62,6 +66,7 @@ end
 assert('dump multi-byte') do
 	actual = YAML.dump({'foo' => 'ふー', 'bar' => 'ばー'})
 	
+	# TODO
 	# Why does this not work?
 	# expected = "---\nbar: \"ばー\"\nfoo: \"ふー\"\n...\n"
 	expected = "---\nbar: \"\\u3070\\u30FC\"\nfoo: \"\\u3075\\u30FC\"\n...\n"
