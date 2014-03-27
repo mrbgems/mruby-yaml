@@ -3,10 +3,14 @@
 
 assert('load scalar') do
 	YAML.load('foo') == 'foo'
-	# Test scalar-to-number conversion
+end
+
+assert('load fixnum') do
 	YAML.load('5') == 5
+end
+
+assert('load float') do
 	YAML.load('5.5') == 5.5
-	YAML.load('39478539846598374659') == 39478539846598374659
 end
 
 assert('load sequence') do
@@ -20,8 +24,8 @@ assert('load mapping') do
 end
 
 assert('load combo') do
-	actual = YAML.load("foo: [1, 2, 3]\nbar: baz")
-	expected = {'foo' => [1, 2, 3], 'bar' => 'baz'}
+	actual = YAML.load("foo: [1, 2.2, 300]\nbar: baz")
+	expected = {'foo' => [1, 2.2, 300], 'bar' => 'baz'}
 	actual == expected
 end
 

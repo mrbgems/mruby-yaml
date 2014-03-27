@@ -134,16 +134,19 @@ node_to_value(mrb_state *mrb,
   {
     case YAML_SCALAR_NODE:
     {
-      char *str = (char *) node->data.scalar.value;
+      const char *str = (char *) node->data.scalar.value;
+      char *endptr;
+      long long ll;
+      double dd;
       
-      /* check if it is a Fixnum */
-      long long ll = strtoll(str, NULL, 0);
-      if (errno != EINVAL)
+      /* Check if it is a Fixnum */
+      ll = strtoll(str, &endptr, 0);
+      if (str != endptr && *endptr == '\0')
         return mrb_fixnum_value(ll);
       
       /* Check if it is a Float */
-      double dd = strtold(str, NULL);
-      if (errno != EINVAL)
+      dd = strtod(str, &endptr);
+      if (str != endptr && *endptr == '\0')
         return mrb_float_value(mrb, dd);
       
       /* Otherwise it is a String */      
