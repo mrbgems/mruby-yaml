@@ -5,6 +5,14 @@ assert('load scalar') do
 	YAML.load('foo') == 'foo'
 end
 
+assert('load fixnum') do
+	YAML.load('5') == 5
+end
+
+assert('load float') do
+	YAML.load('5.5') == 5.5
+end
+
 assert('load sequence') do
 	YAML.load("- foo\n- bar\n- baz") == ['foo', 'bar', 'baz']
 end
@@ -16,8 +24,8 @@ assert('load mapping') do
 end
 
 assert('load combo') do
-	actual = YAML.load("foo: [1, 2, 3]\nbar: baz")
-	expected = {'foo' => ['1', '2', '3'], 'bar' => 'baz'}
+	actual = YAML.load("foo: [1, 2.2, 300]\nbar: baz")
+	expected = {'foo' => [1, 2.2, 300], 'bar' => 'baz'}
 	actual == expected
 end
 
@@ -62,6 +70,7 @@ end
 assert('dump multi-byte') do
 	actual = YAML.dump({'foo' => 'ふー', 'bar' => 'ばー'})
 	
+	# TODO
 	# Why does this not work?
 	# expected = "---\nbar: \"ばー\"\nfoo: \"ふー\"\n...\n"
 	expected = "---\nbar: \"\\u3070\\u30FC\"\nfoo: \"\\u3075\\u30FC\"\n...\n"
