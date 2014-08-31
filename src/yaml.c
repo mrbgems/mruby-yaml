@@ -130,6 +130,10 @@ mrb_value
 node_to_value(mrb_state *mrb,
   yaml_document_t *document, yaml_node_t *node)
 {
+  /* YAML will return a NULL node if the input was empty */
+  if (!node)
+    return mrb_false_value();
+
   switch (node->type)
   {
     case YAML_SCALAR_NODE:

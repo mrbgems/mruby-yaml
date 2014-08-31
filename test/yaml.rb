@@ -1,6 +1,10 @@
 
 # YAML::load
 
+assert('YAML load empty') do
+	YAML.load('') == false
+end
+
 assert('YAML load scalar') do
 	YAML.load('foo') == 'foo'
 end
