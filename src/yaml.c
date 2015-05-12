@@ -14,6 +14,8 @@
 #define strtoll _strtoi64
 #endif
 
+#define streql(a, b) (strcmp(a, b) == 0)
+
 void mrb_mruby_yaml_gem_init(mrb_state *mrb);
 void mrb_mruby_yaml_gem_final(mrb_state *mrb);
 
@@ -133,7 +135,7 @@ node_to_value(mrb_state *mrb,
 {
   /* YAML will return a NULL node if the input was empty */
   if (!node)
-    return mrb_false_value();
+    return mrb_nil_value();
 
   switch (node->type)
   {
@@ -143,25 +145,36 @@ node_to_value(mrb_state *mrb,
       char *endptr;
       long long ll;
       double dd;
-      
-      /* Check if it is a Fixnum */
-      ll = strtoll(str, &endptr, 0);
-      if (str != endptr && *endptr == '\0')
-        return mrb_fixnum_value(ll);
-      
-      /* Check if it is a Float */
-      dd = strtod(str, &endptr);
-      if (str != endptr && *endptr == '\0')
-        return mrb_float_value(mrb, dd);
 
-      /* Check if it is a Boolean */
-      if (strcmp("true", str) == 0)
-        return mrb_true_value();
-      else if (strcmp("false", str) == 0)
-        return mrb_false_value();
-      /* Check if it is a nil */
-      else if (strcmp("nil", str) == 0)
-        return mrb_nil_value();
+      /* if node is a YAML_PLAIN_SCALAR_STYLE */
+      if (node->data.scalar.style == YAML_PLAIN_SCALAR_STYLE) {
+        /* Check if it is a null http://yaml.org/type/null.html */
+        if (streql("nil", str) || streql("null", str) || streql("Null", str) ||
+            streql("NULL", str) || streql("~", str) || streql("", str)) {
+          return mrb_nil_value();
+        /* Check if it is a Boolean http://yaml.org/type/bool.html */
+        } else if (streql("true", str) || streql("True", str) || streql("TRUE", str) ||
+            streql("yes", str) || streql("Yes", str) || streql("YES", str) ||
+            streql("on", str) || streql("On", str) || streql("ON", str) ||
+            streql("y", str) || streql("Y", str)) {
+          return mrb_true_value();
+        } else if (streql("false", str) || streql("False", str) ||
+            streql("FALSE", str) || streql("off", str) || streql("Off", str) ||
+            streql("OFF", str) || streql("no", str) || streql("No", str) ||
+            streql("NO", str) || streql("n", str) || streql("N", str)) {
+          return mrb_false_value();
+        }
+
+        /* Check if it is a Fixnum */
+        ll = strtoll(str, &endptr, 0);
+        if (str != endptr && *endptr == '\0')
+          return mrb_fixnum_value(ll);
+
+        /* Check if it is a Float */
+        dd = strtod(str, &endptr);
+        if (str != endptr && *endptr == '\0')
+          return mrb_float_value(mrb, dd);
+      }
 
       /* Otherwise it is a String */
       return mrb_str_new(mrb, str, node->data.scalar.length);

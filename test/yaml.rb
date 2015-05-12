@@ -2,31 +2,74 @@
 # YAML::load
 
 assert('YAML load empty') do
-	YAML.load('') == false
+	YAML.load('') == nil
 end
 
 assert('YAML load true') do
-	YAML.load('true') == true
+	YAML.load('true') == true &&
+	YAML.load('True') == true &&
+	YAML.load('TRUE') == true &&
+	YAML.load('yes') == true &&
+	YAML.load('Yes') == true &&
+	YAML.load('YES') == true &&
+	YAML.load('on') == true &&
+	YAML.load('On') == true &&
+	YAML.load('ON') == true &&
+	YAML.load('y') == true &&
+	YAML.load('Y') == true
 end
 
 assert('YAML load false') do
-	YAML.load('false') == false
+	YAML.load('false') == false &&
+	YAML.load('False') == false &&
+	YAML.load('FALSE') == false &&
+	YAML.load('off') == false &&
+	YAML.load('Off') == false &&
+	YAML.load('OFF') == false &&
+	YAML.load('no') == false &&
+	YAML.load('NO') == false &&
+	YAML.load('n') == false &&
+	YAML.load('N') == false
 end
 
-assert('YAML load nil') do
-	YAML.load('nil') == nil
+assert('YAML load null') do
+	YAML.load('nil') == nil &&
+	YAML.load('null') == nil &&
+	YAML.load('Null') == nil &&
+	YAML.load('NULL') == nil &&
+	YAML.load('~') == nil
 end
 
 assert('YAML load scalar') do
 	YAML.load('foo') == 'foo'
 end
 
+assert('YAML load true as string') do
+	YAML.load('"true"') == "true"
+end
+
+assert('YAML load false as string') do
+	YAML.load('"false"') == "false"
+end
+
+assert('YAML load nil as string') do
+	YAML.load('"nil"') == "nil"
+end
+
 assert('YAML load fixnum') do
 	YAML.load('5') == 5
 end
 
+assert('YAML load fixnum as string') do
+	YAML.load('"5"') == "5"
+end
+
 assert('YAML load float') do
 	YAML.load('5.5') == 5.5
+end
+
+assert('YAML load float as string') do
+	YAML.load('"5.5"') == "5.5"
 end
 
 assert('YAML load sequence') do
@@ -51,6 +94,52 @@ assert('YAML load multi-byte') do
 	actual == expected
 end
 
+# http://yaml.org/type/bool.html
+assert('YAML boolean mapping') do
+	actual = YAML.load(%(---
+canonical: y
+answer: NO
+logical: True
+option: on
+))
+	expected = { 'canonical' => true, 'answer' => false, 'logical' => true,
+							 'option' => true }
+	assert_equal expected, actual
+end
+
+# http://yaml.org/type/null.html
+assert('YAML load empty document') do
+	YAML.load('---') == nil
+end
+
+assert('YAML null mapping') do
+	actual = YAML.load(%(---
+# This mapping has four keys,
+# one has a value.
+empty:
+canonical: ~
+english: null
+~: null key
+))
+	expected = { 'empty' => nil, 'canonical' => nil,
+							 'english' => nil, nil => 'null key' }
+	assert_equal expected, actual
+end
+
+assert('YAML null sequence') do
+	actual = YAML.load(%(---
+# This sequence has five
+# entries, two have values.
+sparse:
+  - ~
+  - 2nd entry
+  -
+  - 4th entry
+  - Null
+ ))
+	expected = { 'sparse' => [nil, '2nd entry', nil, '4th entry', nil] }
+	assert_equal expected, actual
+end
 
 # YAML::dump
 
@@ -78,7 +167,7 @@ assert('YAML dump mapping') do
 end
 
 assert('YAML dump combo') do
-	expected = {'foo' => [1, 2, 3], 'bar' => 'baz'}
+	expected = {'foo' => [1, 2, 3, nil, true], 'bar' => 'baz', 'harf' => false }
 	actual = YAML.load(YAML.dump(expected))
 	actual == expected
 end
