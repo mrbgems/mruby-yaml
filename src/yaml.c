@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <string.h>
 #include <yaml.h>
 #include <mruby.h>
 #include <mruby/compile.h>
@@ -152,8 +153,17 @@ node_to_value(mrb_state *mrb,
       dd = strtod(str, &endptr);
       if (str != endptr && *endptr == '\0')
         return mrb_float_value(mrb, dd);
-      
-      /* Otherwise it is a String */      
+
+      /* Check if it is a Boolean */
+      if (strcmp("true", str) == 0)
+        return mrb_true_value();
+      else if (strcmp("false", str) == 0)
+        return mrb_false_value();
+      /* Check if it is a nil */
+      else if (strcmp("nil", str) == 0)
+        return mrb_nil_value();
+
+      /* Otherwise it is a String */
       return mrb_str_new(mrb, str, node->data.scalar.length);
     }
     

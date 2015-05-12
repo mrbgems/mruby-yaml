@@ -5,6 +5,18 @@ assert('YAML load empty') do
 	YAML.load('') == false
 end
 
+assert('YAML load true') do
+	YAML.load('true') == true
+end
+
+assert('YAML load false') do
+	YAML.load('false') == false
+end
+
+assert('YAML load nil') do
+	YAML.load('nil') == nil
+end
+
 assert('YAML load scalar') do
 	YAML.load('foo') == 'foo'
 end
@@ -28,8 +40,8 @@ assert('YAML load mapping') do
 end
 
 assert('YAML load combo') do
-	actual = YAML.load("foo: [1, 2.2, 300]\nbar: baz")
-	expected = {'foo' => [1, 2.2, 300], 'bar' => 'baz'}
+	actual = YAML.load("foo: [1, 2.2, 300, true, nil]\nbar: baz\nharf: false")
+	expected = {'foo' => [1, 2.2, 300, true, nil], 'bar' => 'baz', 'harf' => false}
 	actual == expected
 end
 
