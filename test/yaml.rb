@@ -173,9 +173,14 @@ assert('YAML dump mapping') do
 end
 
 assert('YAML dump combo') do
-	expected = { 'foo' => [1, 2, 3, nil, true], 'bar' => 'baz', 'harf' => false, nil => true }
+	expected = {
+		'foo' => [1, 2, 3, nil, true],
+		'bar' => 'baz',
+		'harf' => false,
+		nil => ""
+	}
 	actual = YAML.load(YAML.dump(expected))
-	actual == expected
+	assert_equal expected, actual
 end
 
 assert('YAML dump multi-byte') do
