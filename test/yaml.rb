@@ -88,6 +88,12 @@ assert('YAML load combo') do
 	actual == expected
 end
 
+assert('YAML load all') do
+	actual = YAML.load("y: 1\nn: 2\nnull: 3\n~: 4")
+	expected = { 'y' => 1, 'n' => 2, 'null' => 3, nil => 4 }
+	assert_equal expected, actual
+end
+
 assert('YAML load multi-byte') do
 	actual = YAML.load("bar: ばー\nfoo: ふー")
 	expected = {'foo' => 'ふー', 'bar' => 'ばー'}
@@ -167,7 +173,7 @@ assert('YAML dump mapping') do
 end
 
 assert('YAML dump combo') do
-	expected = {'foo' => [1, 2, 3, nil, true], 'bar' => 'baz', 'harf' => false }
+	expected = { 'foo' => [1, 2, 3, nil, true], 'bar' => 'baz', 'harf' => false, nil => true }
 	actual = YAML.load(YAML.dump(expected))
 	actual == expected
 end
