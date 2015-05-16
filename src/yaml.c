@@ -16,6 +16,28 @@
 
 #define streql(a, b) (strcmp(a, b) == 0)
 
+#ifndef MRUBY_YAML_NULL
+#  define MRUBY_YAML_NULL 1
+#endif
+#ifndef MRUBY_YAML_BOOLEAN_ON
+#  define MRUBY_YAML_BOOLEAN_ON 1
+#endif
+#ifndef MRUBY_YAML_BOOLEAN_YES
+#  define MRUBY_YAML_BOOLEAN_YES 1
+#endif
+#ifndef MRUBY_YAML_BOOLEAN_SHORTHAND_YES
+#  define MRUBY_YAML_BOOLEAN_SHORTHAND_YES 1
+#endif
+#ifndef MRUBY_YAML_BOOLEAN_OFF
+#  define MRUBY_YAML_BOOLEAN_OFF 1
+#endif
+#ifndef MRUBY_YAML_BOOLEAN_NO
+#  define MRUBY_YAML_BOOLEAN_NO 1
+#endif
+#ifndef MRUBY_YAML_BOOLEAN_SHORTHAND_NO
+#  define MRUBY_YAML_BOOLEAN_SHORTHAND_NO 1
+#endif
+
 void mrb_mruby_yaml_gem_init(mrb_state *mrb);
 void mrb_mruby_yaml_gem_final(mrb_state *mrb);
 
@@ -155,19 +177,38 @@ node_to_value_with_aliases(mrb_state *mrb,
 
         if (use_scalar_aliases) {
           /* Check if it is a null http://yaml.org/type/null.html */
-          if (streql("nil", str) || streql("null", str) || streql("Null", str) ||
-              streql("NULL", str) || streql("", str)) {
+          if (streql("nil", str) || streql("", str)
+          #if MRUBY_YAML_NULL
+            || streql("null", str) || streql("Null", str) || streql("NULL", str)
+          #endif
+            ) {
             return mrb_nil_value();
           /* Check if it is a Boolean http://yaml.org/type/bool.html */
-          } else if (streql("true", str) || streql("True", str) || streql("TRUE", str) ||
-              streql("yes", str) || streql("Yes", str) || streql("YES", str) ||
-              streql("on", str) || streql("On", str) || streql("ON", str) ||
-              streql("y", str) || streql("Y", str)) {
+          } else if (
+            streql("true", str) || streql("True", str) || streql("TRUE", str)
+          #if MRUBY_YAML_BOOLEAN_ON
+            || streql("on", str) || streql("On", str) || streql("ON", str)
+          #endif
+          #if MRUBY_YAML_BOOLEAN_YES
+            || streql("yes", str) || streql("Yes", str) || streql("YES", str)
+          #endif
+          #if MRUBY_YAML_BOOLEAN_SHORTHAND_YES
+            || streql("y", str) || streql("Y", str)
+          #endif
+            ) {
             return mrb_true_value();
-          } else if (streql("false", str) || streql("False", str) ||
-              streql("FALSE", str) || streql("off", str) || streql("Off", str) ||
-              streql("OFF", str) || streql("no", str) || streql("No", str) ||
-              streql("NO", str) || streql("n", str) || streql("N", str)) {
+          } else if (
+            streql("false", str) || streql("False", str) || streql("FALSE", str)
+          #if MRUBY_YAML_BOOLEAN_OFF
+            || streql("off", str) || streql("Off", str) || streql("OFF", str)
+          #endif
+          #if MRUBY_YAML_BOOLEAN_NO
+            || streql("no", str) || streql("No", str)  || streql("NO", str)
+          #endif
+          #if MRUBY_YAML_BOOLEAN_SHORTHAND_NO
+            || streql("n", str) || streql("N", str)
+          #endif
+            ) {
             return mrb_false_value();
           }
         }
@@ -319,7 +360,7 @@ int value_to_node(mrb_state *mrb,
       if (mrb_nil_p(value)) {
         /* http://yaml.org/type/null.html
            Canonical form */
-        value = mrb_str_new_cstr(mrb, "~");
+        value = mrb_str_new_lit(mrb, "~");
       } else {
         /* Equivalent to `obj = obj#to_s` */
         value = mrb_obj_as_string(mrb, value);
@@ -352,6 +393,14 @@ mrb_mruby_yaml_gem_init(mrb_state *mrb)
   struct RClass *klass = mrb_define_module(mrb, "YAML");
   mrb_define_class_method(mrb, klass, "load", mrb_yaml_load, ARGS_REQ(1));
   mrb_define_class_method(mrb, klass, "dump", mrb_yaml_dump, ARGS_REQ(1));
+
+  mrb_define_const(mrb, klass, "SUPPORT_NULL", mrb_bool_value(MRUBY_YAML_NULL));
+  mrb_define_const(mrb, klass, "SUPPORT_BOOLEAN_ON", mrb_bool_value(MRUBY_YAML_BOOLEAN_ON));
+  mrb_define_const(mrb, klass, "SUPPORT_BOOLEAN_YES", mrb_bool_value(MRUBY_YAML_BOOLEAN_YES));
+  mrb_define_const(mrb, klass, "SUPPORT_BOOLEAN_SHORTHAND_YES", mrb_bool_value(MRUBY_YAML_BOOLEAN_SHORTHAND_YES));
+  mrb_define_const(mrb, klass, "SUPPORT_BOOLEAN_OFF", mrb_bool_value(MRUBY_YAML_BOOLEAN_OFF));
+  mrb_define_const(mrb, klass, "SUPPORT_BOOLEAN_NO", mrb_bool_value(MRUBY_YAML_BOOLEAN_NO));
+  mrb_define_const(mrb, klass, "SUPPORT_BOOLEAN_SHORTHAND_NO", mrb_bool_value(MRUBY_YAML_BOOLEAN_SHORTHAND_NO));
 }
 
 

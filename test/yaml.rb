@@ -6,38 +6,55 @@ assert('YAML load empty') do
 end
 
 assert('YAML load true') do
-	YAML.load('true') == true &&
-	YAML.load('True') == true &&
-	YAML.load('TRUE') == true &&
-	YAML.load('yes') == true &&
-	YAML.load('Yes') == true &&
-	YAML.load('YES') == true &&
-	YAML.load('on') == true &&
-	YAML.load('On') == true &&
-	YAML.load('ON') == true &&
-	YAML.load('y') == true &&
-	YAML.load('Y') == true
+	assert_true YAML.load('true')
+	assert_true YAML.load('True')
+	assert_true YAML.load('TRUE')
+	if YAML::SUPPORT_BOOLEAN_YES
+		assert_true YAML.load('yes')
+		assert_true YAML.load('Yes')
+		assert_true YAML.load('YES')
+	end
+	if YAML::SUPPORT_BOOLEAN_ON
+		assert_true YAML.load('on')
+		assert_true YAML.load('On')
+		assert_true YAML.load('ON')
+	end
+	if YAML::SUPPORT_BOOLEAN_SHORTHAND_YES
+		assert_true YAML.load('y')
+		assert_true YAML.load('Y')
+	end
+	true
 end
 
 assert('YAML load false') do
-	YAML.load('false') == false &&
-	YAML.load('False') == false &&
-	YAML.load('FALSE') == false &&
-	YAML.load('off') == false &&
-	YAML.load('Off') == false &&
-	YAML.load('OFF') == false &&
-	YAML.load('no') == false &&
-	YAML.load('NO') == false &&
-	YAML.load('n') == false &&
-	YAML.load('N') == false
+	assert_false YAML.load('false')
+	assert_false YAML.load('False')
+	assert_false YAML.load('FALSE')
+	if YAML::SUPPORT_BOOLEAN_OFF
+		assert_false YAML.load('off')
+		assert_false YAML.load('Off')
+		assert_false YAML.load('OFF')
+	end
+	if YAML::SUPPORT_BOOLEAN_NO
+		assert_false YAML.load('no')
+		assert_false YAML.load('NO')
+	end
+	if YAML::SUPPORT_BOOLEAN_SHORTHAND_NO
+		assert_false YAML.load('n')
+		assert_false YAML.load('N')
+	end
+	true
 end
 
 assert('YAML load null') do
-	YAML.load('nil') == nil &&
-	YAML.load('null') == nil &&
-	YAML.load('Null') == nil &&
-	YAML.load('NULL') == nil &&
-	YAML.load('~') == nil
+	assert_equal nil, YAML.load('nil')
+	assert_equal nil, YAML.load('~')
+	if YAML::SUPPORT_NULL
+		assert_equal nil, YAML.load('null')
+		assert_equal nil, YAML.load('Null')
+		assert_equal nil, YAML.load('NULL')
+	end
+	true
 end
 
 assert('YAML load scalar') do
@@ -111,7 +128,8 @@ option: on
 	expected = { 'canonical' => true, 'answer' => false, 'logical' => true,
 							 'option' => true }
 	assert_equal expected, actual
-end
+end if YAML::SUPPORT_BOOLEAN_NO && YAML::SUPPORT_BOOLEAN_YES &&
+	YAML::SUPPORT_BOOLEAN_ON && YAML::SUPPORT_BOOLEAN_OFF
 
 # http://yaml.org/type/null.html
 assert('YAML load empty document') do
@@ -130,7 +148,7 @@ english: null
 	expected = { 'empty' => nil, 'canonical' => nil,
 							 'english' => nil, nil => 'null key' }
 	assert_equal expected, actual
-end
+end if YAML::SUPPORT_NULL
 
 assert('YAML null sequence') do
 	actual = YAML.load(%(---
@@ -145,7 +163,7 @@ sparse:
  ))
 	expected = { 'sparse' => [nil, '2nd entry', nil, '4th entry', nil] }
 	assert_equal expected, actual
-end
+end if YAML::SUPPORT_NULL
 
 # YAML::dump
 
