@@ -391,8 +391,8 @@ void
 mrb_mruby_yaml_gem_init(mrb_state *mrb)
 {
   struct RClass *klass = mrb_define_module(mrb, "YAML");
-  mrb_define_class_method(mrb, klass, "load", mrb_yaml_load, ARGS_REQ(1));
-  mrb_define_class_method(mrb, klass, "dump", mrb_yaml_dump, ARGS_REQ(1));
+  mrb_define_class_method(mrb, klass, "load", mrb_yaml_load, MRB_ARGS_REQ(1));
+  mrb_define_class_method(mrb, klass, "dump", mrb_yaml_dump, MRB_ARGS_REQ(1));
 
   mrb_define_const(mrb, klass, "SUPPORT_NULL", mrb_bool_value(MRUBY_YAML_NULL));
   mrb_define_const(mrb, klass, "SUPPORT_BOOLEAN_ON", mrb_bool_value(MRUBY_YAML_BOOLEAN_ON));
