@@ -8,7 +8,8 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
 	spec.linker.libraries << 'yaml'
   require 'open3'
 
-  yaml_dir = "#{build_dir}/yaml-0.1.5"
+  yaml_version = "0.1.6"
+  yaml_dir = "#{build_dir}/yaml-#{yaml_version}"
 
   def run_command env, command
     STDOUT.sync = true
@@ -24,7 +25,7 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
   if ! File.exists? yaml_dir
     Dir.chdir(build_dir) do
       e = {}
-      run_command e, 'curl http://pyyaml.org/download/libyaml/yaml-0.1.5.tar.gz | tar -xzv'
+      run_command e, "curl http://pyyaml.org/download/libyaml/yaml-#{yaml_version}.tar.gz | tar -xzv"
       run_command e, "mkdir #{yaml_dir}/build"
     end
   end
