@@ -30,7 +30,7 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
     end
   end
 
-  if ! File.exists? "#{yaml_dir}/libyaml.a"
+  if ! File.exists? "#{yaml_dir}/build/lib/libyaml.a"
     Dir.chdir yaml_dir do
       e = {
         'CC' => "#{spec.build.cc.command} #{spec.build.cc.flags.join(' ')}",
