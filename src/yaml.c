@@ -26,7 +26,7 @@
 #  define MRUBY_YAML_BOOLEAN_YES 1
 #endif
 #ifndef MRUBY_YAML_BOOLEAN_SHORTHAND_YES
-#  define MRUBY_YAML_BOOLEAN_SHORTHAND_YES 1
+#  define MRUBY_YAML_BOOLEAN_SHORTHAND_YES 0
 #endif
 #ifndef MRUBY_YAML_BOOLEAN_OFF
 #  define MRUBY_YAML_BOOLEAN_OFF 1
@@ -35,7 +35,7 @@
 #  define MRUBY_YAML_BOOLEAN_NO 1
 #endif
 #ifndef MRUBY_YAML_BOOLEAN_SHORTHAND_NO
-#  define MRUBY_YAML_BOOLEAN_SHORTHAND_NO 1
+#  define MRUBY_YAML_BOOLEAN_SHORTHAND_NO 0
 #endif
 
 void mrb_mruby_yaml_gem_init(mrb_state *mrb);
