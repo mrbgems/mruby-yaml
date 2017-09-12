@@ -304,7 +304,7 @@ int value_to_node(mrb_state *mrb,
   {
     case MRB_TT_ARRAY:
     {
-      mrb_int len = mrb_ary_len(mrb, value);
+      mrb_int len = RARRAY_LEN(value);
       mrb_int i;
       int ai = mrb_gc_arena_save(mrb);
 
@@ -331,7 +331,7 @@ int value_to_node(mrb_state *mrb,
        */
 
       mrb_value keys = mrb_hash_keys(mrb, value);
-      mrb_int len = mrb_ary_len(mrb, keys);
+      mrb_int len = RARRAY_LEN(keys);
       mrb_int i;
       int ai = mrb_gc_arena_save(mrb);
 
