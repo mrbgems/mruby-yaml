@@ -7,7 +7,7 @@
 #include <mruby/string.h>
 #include <mruby/array.h>
 #include <mruby/hash.h>
-#include <inttypes.h>
+#include <stdint.h>
 #include <errno.h>
 
 #if defined(_MSC_VER)
@@ -371,12 +371,13 @@ int value_to_node(mrb_state *mrb,
     case MRB_TT_STRING:
     {
       yaml_scalar_style_t style = YAML_ANY_SCALAR_STYLE;
+      yaml_char_t *value_chars;
       if (RSTRING_LEN(value) == 0) {
         /* If the String is empty, it may be reloaded as a nil instead of an
          * empty string, to avoid that place a quoted string instead */
         style = YAML_SINGLE_QUOTED_SCALAR_STYLE;
       }
-      yaml_char_t *value_chars = (unsigned char *) RSTRING_PTR(value);
+      value_chars = (unsigned char *) RSTRING_PTR(value);
       node = yaml_document_add_scalar(document, NULL,
         value_chars, RSTRING_LEN(value), style);
       break;
