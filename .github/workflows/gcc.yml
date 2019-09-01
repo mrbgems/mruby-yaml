@@ -20,3 +20,5 @@ jobs:
         run: |
           cp -fp .github/build_config.rb mruby/build_config.rb
           cd mruby && make all
+      - name: Test
+        run: cd mruby && make test
