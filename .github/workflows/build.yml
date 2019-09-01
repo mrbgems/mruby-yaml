@@ -4,4 +4,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - run: echo hello
+      - name: Checkout
+        uses: actions/checkout@v1.0.0
+        with:
+          fetch-depth: 5
