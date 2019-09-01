@@ -13,14 +13,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1.0.0
         with:
-          fetch-depth: 5
+          fetch-depth: 10
       - name: Set ENV
         run: |
           echo '##[set-env name=MRUBY_BUILD]../.github/build_config.rb'
           echo '##[set-env name=JOBS]'-j$((1 + $(nproc --all)))
       - name: Clone mruby
         run: git clone --depth=1 --branch=2.0.1 https://github.com/mruby/mruby
-      - name: build
+      - name: Build
         run: cd mruby && make $JOBS all
       - name: Test
         run: cd mruby && make test
