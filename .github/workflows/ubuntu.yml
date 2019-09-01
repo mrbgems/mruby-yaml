@@ -1,7 +1,7 @@
-name: gcc
+name: ubuntu
 on: [push, pull_request]
 jobs:
-  build:
+  gcc:
     runs-on: ubuntu-latest
     steps:
       - name: Install libraries
