@@ -17,7 +17,7 @@ jobs:
       - name: Set ENV
         run: |
           echo '##[set-env name=MRUBY_BUILD]../.github/build_config.rb'
-          echo '##[set-env name=JOBS]'-j$((1 + $(nproc --all)))
+          echo '##[set-env name=JOBS]'-j$(nproc --all)
       - name: Clone mruby
         run: git clone --depth=1 --branch=2.0.1 https://github.com/mruby/mruby
       - name: Build
