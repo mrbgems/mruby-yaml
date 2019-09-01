@@ -124,9 +124,14 @@ canonical: y
 answer: NO
 logical: True
 option: on
+short_no: n
 ))
-	expected = { 'canonical' => true, 'answer' => false, 'logical' => true,
-							 'option' => true }
+        y_val = 'y'
+        y_val = true if YAML::SUPPORT_BOOLEAN_SHORTHAND_YES
+        n_val = 'n'
+        n_val = false if YAML::SUPPORT_BOOLEAN_SHORTHAND_NO
+	expected = { 'canonical' => y_val, 'answer' => false, 'logical' => true,
+							 'option' => true, 'short_no' => n_val }
 	assert_equal expected, actual
 end if YAML::SUPPORT_BOOLEAN_NO && YAML::SUPPORT_BOOLEAN_YES &&
 	YAML::SUPPORT_BOOLEAN_ON && YAML::SUPPORT_BOOLEAN_OFF
