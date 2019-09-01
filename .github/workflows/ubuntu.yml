@@ -1,0 +1,24 @@
+name: ubuntu
+on: [push, pull_request]
+jobs:
+  gcc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install libraries
+        run: |
+          set -x
+          sudo sed /etc/apt/sources.list -e "s/^# deb-src/deb-src/g" -i
+          sudo apt-get update
+          sudo apt-get install rake bison git gperf libonig-dev
+      - name: Checkout
+        uses: actions/checkout@v1.0.0
+        with:
+          fetch-depth: 5
+      - name: Clone mruby
+        run: git clone --depth=1 https://github.com/mruby/mruby
+      - name: Build
+        run: |
+          cp -fp .github/build_config.rb mruby/build_config.rb
+          cd mruby && make all
+      - name: Test
+        run: cd mruby && make test
