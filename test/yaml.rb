@@ -2,7 +2,7 @@
 # YAML::load
 
 assert('YAML load empty') do
-	YAML.load('') == nil
+	assert_nil YAML.load('')
 end
 
 assert('YAML load true') do
@@ -58,51 +58,49 @@ assert('YAML load null') do
 end
 
 assert('YAML load scalar') do
-	YAML.load('foo') == 'foo'
+	assert_equal 'foo', YAML.load('foo')
 end
 
 assert('YAML load true as string') do
-	YAML.load('"true"') == "true"
+	assert_equal 'true', YAML.load('"true"')
 end
 
 assert('YAML load false as string') do
-	YAML.load('"false"') == "false"
+	assert_equal 'false', YAML.load('"false"')
 end
 
 assert('YAML load nil as string') do
-	YAML.load('"nil"') == "nil"
+	assert_equal 'nil', YAML.load('"nil"')
 end
 
 assert('YAML load fixnum') do
-	YAML.load('5') == 5
+	assert_equal 5, YAML.load('5')
 end
 
 assert('YAML load fixnum as string') do
-	YAML.load('"5"') == "5"
+	assert_equal '5', YAML.load('"5"')
 end
 
 assert('YAML load float') do
-	YAML.load('5.5') == 5.5
+	assert_equal 5.5, YAML.load('5.5')
 end
 
 assert('YAML load float as string') do
-	YAML.load('"5.5"') == "5.5"
+	assert_equal "5.5", YAML.load('"5.5"')
 end
 
 assert('YAML load sequence') do
-	YAML.load("- foo\n- bar\n- baz") == ['foo', 'bar', 'baz']
+	assert_equal ['foo', 'bar', 'baz'], YAML.load("- foo\n- bar\n- baz")
 end
 
 assert('YAML load mapping') do
-	actual = YAML.load("foo: faz\nbar: baz")
-	expected = {'foo' => 'faz', 'bar' => 'baz'}
-	actual == expected
+	assert_equal({'foo' => 'faz', 'bar' => 'baz'}, YAML.load("foo: faz\nbar: baz"))
 end
 
 assert('YAML load combo') do
 	actual = YAML.load("foo: [1, 2.2, 300, true, nil]\nbar: baz\nharf: false")
 	expected = {'foo' => [1, 2.2, 300, true, nil], 'bar' => 'baz', 'harf' => false}
-	actual == expected
+	assert_equal expected, actual
 end
 
 assert('YAML load all') do
@@ -114,7 +112,7 @@ end
 assert('YAML load multi-byte') do
 	actual = YAML.load("bar: ばー\nfoo: ふー")
 	expected = {'foo' => 'ふー', 'bar' => 'ばー'}
-	actual == expected
+	assert_equal expected, actual
 end
 
 # http://yaml.org/type/bool.html
@@ -133,7 +131,7 @@ end if YAML::SUPPORT_BOOLEAN_NO && YAML::SUPPORT_BOOLEAN_YES &&
 
 # http://yaml.org/type/null.html
 assert('YAML load empty document') do
-	YAML.load('---') == nil
+	assert_nil YAML.load('---')
 end
 
 assert('YAML null mapping') do
@@ -175,19 +173,19 @@ end if YAML::SUPPORT_NULL
 assert('YAML dump scalar') do
 	expected = 'foo'
 	actual = YAML.load(YAML.dump(expected))
-	actual == expected
+	assert_equal expected, actual
 end
 
 assert('YAML dump sequence') do
 	expected = ['foo', 'bar', 'baz']
 	actual = YAML.load(YAML.dump(expected))
-	actual == expected
+	assert_equal expected, actual
 end
 
 assert('YAML dump mapping') do
 	expected = {'foo' => 'faz', 'bar' => 'baz'}
 	actual = YAML.load(YAML.dump(expected))
-	actual == expected
+	assert_equal expected, actual
 end
 
 assert('YAML dump combo') do
@@ -204,5 +202,5 @@ end
 assert('YAML dump multi-byte') do
 	expected = {'foo' => 'ふー', 'bar' => 'ばー'}
 	actual = YAML.load(YAML.dump(expected))
-	actual == expected
+	assert_equal expected, actual
 end
