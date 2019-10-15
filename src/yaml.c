@@ -113,7 +113,7 @@ mrb_yaml_dump(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "o", &root);
 
   /* Build the document */
-  yaml_document_initialize(&document, NULL, NULL, NULL, 0, 0);
+  yaml_document_initialize(&document, NULL, NULL, NULL, 0, 1);
   value_to_node(mrb, &document, root);
 
   /* Initialize the emitter */

@@ -209,3 +209,9 @@ assert('YAML dump multi-byte') do
   actual = YAML.load(YAML.dump(expected))
   assert_equal expected, actual
 end
+
+assert('YAML dump implicit end') do
+  expected = "---\nfoo:\n- bar\n"
+  actual = YAML.dump(YAML.load(expected))
+  assert_equal expected, actual
+end
