@@ -355,19 +355,6 @@ int value_to_node(mrb_state *mrb,
       break;
     }
 
-    default:
-    {
-      if (mrb_nil_p(value)) {
-        /* http://yaml.org/type/null.html
-           Canonical form */
-        value = mrb_str_new_lit(mrb, "~");
-      } else {
-        /* Equivalent to `obj = obj#to_s` */
-        value = mrb_obj_as_string(mrb, value);
-      }
-      /* Fallthrough */
-    }
-
     case MRB_TT_STRING:
     {
       yaml_scalar_style_t style = YAML_ANY_SCALAR_STYLE;
@@ -380,6 +367,21 @@ int value_to_node(mrb_state *mrb,
       value_chars = (unsigned char *) RSTRING_PTR(value);
       node = yaml_document_add_scalar(document, NULL,
         value_chars, RSTRING_LEN(value), style);
+      break;
+    }
+
+    default:
+    {
+      if (mrb_nil_p(value)) {
+        /* http://yaml.org/type/null.html
+           Canonical form */
+        value = mrb_str_new_lit(mrb, "~");
+        node = yaml_document_add_scalar(document, NULL,
+                (unsigned char *) RSTRING_PTR(value), 1, YAML_ANY_SCALAR_STYLE);
+      } else {
+        /* Equivalent to `obj = obj#to_s` */
+        node = value_to_node(mrb, document, mrb_obj_as_string(mrb, value));
+      }
       break;
     }
   }
