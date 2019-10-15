@@ -9,6 +9,7 @@
 #include <mruby/hash.h>
 #include <stdint.h>
 #include <errno.h>
+#include <ctype.h>
 
 #if defined(_MSC_VER)
 #define strtoll _strtoi64
@@ -363,6 +364,10 @@ int value_to_node(mrb_state *mrb,
         /* If the String is empty, it may be reloaded as a nil instead of an
          * empty string, to avoid that place a quoted string instead */
         style = YAML_SINGLE_QUOTED_SCALAR_STYLE;
+      }
+      else if (!isalnum(RSTRING_PTR(value)[0])) {
+        /* Easy mimic of https://github.com/ruby/psych/blob/v3.1.0/lib/psych/visitors/yaml_tree.rb#L307-L308 */
+        style = YAML_DOUBLE_QUOTED_SCALAR_STYLE;
       }
       value_chars = (unsigned char *) RSTRING_PTR(value);
       node = yaml_document_add_scalar(document, NULL,

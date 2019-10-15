@@ -215,3 +215,9 @@ assert('YAML dump implicit end') do
   actual = YAML.dump(YAML.load(expected))
   assert_equal expected, actual
 end
+
+assert('YAML dump double quote') do
+  expected = %Q[---\nfoo:\n- "/bar"\n- "-- baz"\n]
+  actual = YAML.dump(YAML.load(expected))
+  assert_equal expected, actual
+end
