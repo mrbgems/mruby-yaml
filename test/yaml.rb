@@ -204,6 +204,12 @@ assert('YAML dump combo') do
   assert_equal expected, actual
 end
 
+assert('YAML dump to_yaml') do
+  expected = YAML.dump(['foo', 'bar'])
+  actual = ['foo', 'bar'].to_yaml
+  assert_equal expected, actual
+end
+
 assert('YAML dump multi-byte') do
   expected = {'foo' => 'ふー', 'bar' => 'ばー'}
   actual = YAML.load(YAML.dump(expected))
