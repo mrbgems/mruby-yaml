@@ -360,12 +360,17 @@ int value_to_node(mrb_state *mrb,
     {
       yaml_scalar_style_t style = YAML_ANY_SCALAR_STYLE;
       yaml_char_t *value_chars;
+      char *newline;
       if (RSTRING_LEN(value) == 0) {
         /* If the String is empty, it may be reloaded as a nil instead of an
          * empty string, to avoid that place a quoted string instead */
         style = YAML_SINGLE_QUOTED_SCALAR_STYLE;
-      }
-      else if (!isalnum(RSTRING_PTR(value)[0])) {
+      } else if ((newline = strchr(RSTRING_PTR(value), '\n')) != NULL
+                 && newline < (RSTRING_PTR(value) + RSTRING_LEN(value) - 1)) {
+        /* match \n except blank line at the end of string
+         * https://github.com/ruby/psych/blob/v3.1.0/lib/psych/visitors/yaml_tree.rb#L299 */
+        style = YAML_LITERAL_SCALAR_STYLE;
+      } else if (!isalnum(RSTRING_PTR(value)[0])) {
         /* Easy mimic of https://github.com/ruby/psych/blob/v3.1.0/lib/psych/visitors/yaml_tree.rb#L307-L308 */
         style = YAML_DOUBLE_QUOTED_SCALAR_STYLE;
       }
