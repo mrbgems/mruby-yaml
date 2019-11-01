@@ -228,6 +228,12 @@ assert('YAML dump double quote') do
   assert_equal expected, actual
 end
 
+assert('YAML dump single quote') do
+  expected = %Q[---\nfoo: '{"bar": 1}'\n]
+  actual = YAML.dump(YAML.load(expected))
+  assert_equal expected, actual
+end
+
 assert('YAML dump multi line') do
   expected = %Q[---\na: |\n  b\n  c\n]
   actual = YAML.dump(YAML.load(expected))

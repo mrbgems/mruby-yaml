@@ -370,7 +370,7 @@ int value_to_node(mrb_state *mrb,
         /* match \n except blank line at the end of string
          * https://github.com/ruby/psych/blob/v3.1.0/lib/psych/visitors/yaml_tree.rb#L299 */
         style = YAML_LITERAL_SCALAR_STYLE;
-      } else if (!isalnum(RSTRING_PTR(value)[0])) {
+      } else if (!isalnum(RSTRING_PTR(value)[0]) && strchr(RSTRING_PTR(value), '"') == NULL) {
         /* Easy mimic of https://github.com/ruby/psych/blob/v3.1.0/lib/psych/visitors/yaml_tree.rb#L307-L308 */
         style = YAML_DOUBLE_QUOTED_SCALAR_STYLE;
       }
