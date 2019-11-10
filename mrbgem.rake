@@ -20,7 +20,7 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
   use_system_library = ENV.fetch('MRUBY_YAML_USE_SYSTEM_LIBRARY', '') != ''
 
   unless use_system_library
-    yaml_version = "0.2.1"
+    yaml_version = "0.2.2"
     yaml_dir = "#{build_dir}/yaml-#{yaml_version}"
 
     FileUtils.mkdir_p build_dir
