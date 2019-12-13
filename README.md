@@ -1,6 +1,6 @@
 ## mruby-yaml
 
-[![Ubuntu Status](https://github.com/mrbgems/mruby-yaml/workflows/ubuntu/badge.svg)](https://github.com/mrbgems/mruby-yaml/actions?query=workflow%3Aubuntu)
+[![Ubuntu Status](https://github.com/mrbgems/mruby-yaml/workflows/ubuntu/badge.svg?branch=master)](https://github.com/mrbgems/mruby-yaml/actions?query=workflow%3Aubuntu+branch%3Amaster)
 
 #### YAML gem for [mruby](https://github.com/mruby/mruby)
 
