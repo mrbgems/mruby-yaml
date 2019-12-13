@@ -7,7 +7,6 @@ jobs:
       - name: Install libraries
         run: |
           set -x
-          sudo sed /etc/apt/sources.list -e "s/^# deb-src/deb-src/g" -i
           sudo apt-get update
           sudo apt-get install rake bison git gperf libonig-dev
       - name: Checkout
