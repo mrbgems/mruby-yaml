@@ -1,5 +1,7 @@
 ## mruby-yaml
 
+![Ubuntu Status](https://github.com/mrbgems/mruby-yaml/workflows/ubuntu/badge.svg)
+
 #### YAML gem for [mruby](https://github.com/mruby/mruby)
 
 mruby-yaml wraps [libyaml](https://pyyaml.org/wiki/LibYAML) and therefore complies with the YAML 1.1 standard. File IO is not supported, as this would create a dependency on other mruby gems.
