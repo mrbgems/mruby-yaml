@@ -6,8 +6,6 @@ jobs:
     steps:
       - name: Install libraries
         run: |
-          set -x
-          sudo apt-get update
           sudo apt-get install rake bison git gperf libonig-dev
       - name: Checkout
         uses: actions/checkout@v1.0.0
