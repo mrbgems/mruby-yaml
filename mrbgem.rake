@@ -28,7 +28,8 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
     if ! File.exists? yaml_dir
       Dir.chdir(build_dir) do
         e = {}
-        run_command e, "curl -L https://pyyaml.org/download/libyaml/yaml-#{yaml_version}.tar.gz | tar -xzv"
+        tar_zxf = (RUBY_PLATFORM.match(/solaris/) ? 'gzip -d | tar xf -' : 'tar zxf -')
+        run_command e, "curl -L https://pyyaml.org/download/libyaml/yaml-#{yaml_version}.tar.gz | #{tar_zxf}"
         run_command e, "mkdir #{yaml_dir}/build"
       end
     end
