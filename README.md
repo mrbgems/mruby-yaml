@@ -4,7 +4,7 @@
 
 #### YAML gem for [mruby](https://github.com/mruby/mruby)
 
-mruby-yaml wraps [libyaml](https://pyyaml.org/wiki/LibYAML) and therefore complies with the YAML 1.1 standard. File IO is not supported, as this would create a dependency on other mruby gems.
+mruby-yaml wraps [libyaml](https://pyyaml.org/wiki/LibYAML) (included in this repo) and therefore complies with the YAML 1.1 standard. File IO is not supported, as this would create a dependency on other mruby gems.
 
 ### Defines
 | Name                             | Default | Description                    |

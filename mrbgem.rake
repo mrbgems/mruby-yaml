@@ -21,17 +21,16 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
 
   unless use_system_library
     yaml_version = "0.2.2"
-    yaml_dir = "#{build_dir}/yaml-#{yaml_version}"
+    yaml_base_dir = "yaml-#{yaml_version}"
+    yaml_dir = File.join(build_dir, yaml_base_dir)
 
     FileUtils.mkdir_p build_dir
 
-    if ! File.exists? yaml_dir
-      Dir.chdir(build_dir) do
-        e = {}
-        tar_zxf = (RUBY_PLATFORM.match(/solaris/) ? 'gzip -d | tar xf -' : 'tar zxf -')
-        run_command e, "curl -L https://pyyaml.org/download/libyaml/yaml-#{yaml_version}.tar.gz | #{tar_zxf}"
-        run_command e, "mkdir #{yaml_dir}/build"
-      end
+    # libyaml has its own ideas about where it's going to be built so
+    # we just copy the source tree into the build directory and let it
+    # do its thing there.
+    if ! File.exists? "#{yaml_dir}"
+      FileUtils.cp_r File.join(spec.dir, 'third_party', yaml_base_dir), build_dir
     end
 
     if ! File.exists? "#{yaml_dir}/build/lib/libyaml.a"
