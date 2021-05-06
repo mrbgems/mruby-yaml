@@ -20,18 +20,22 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
   use_system_library = ENV.fetch('MRUBY_YAML_USE_SYSTEM_LIBRARY', '') != ''
 
   unless use_system_library
-    yaml_version = "0.2.2"
-    yaml_dir = "#{build_dir}/yaml-#{yaml_version}"
+    yaml_base_dir = "libyaml"
+    yaml_dir = File.join(build_dir, yaml_base_dir)
 
     FileUtils.mkdir_p build_dir
 
-    if ! File.exists? yaml_dir
-      Dir.chdir(build_dir) do
-        e = {}
-        tar_zxf = (RUBY_PLATFORM.match(/solaris/) ? 'gzip -d | tar xf -' : 'tar zxf -')
-        run_command e, "curl -L https://pyyaml.org/download/libyaml/yaml-#{yaml_version}.tar.gz | #{tar_zxf}"
-        run_command e, "mkdir #{yaml_dir}/build"
-      end
+    # We build libyaml in the gem's build directory, which means
+    # copying the sources from the repo.
+    if ! File.exists? "#{yaml_dir}"
+
+      # But first, we generate the configure script. This requires GNU
+      # autoconf to be installed.
+      Dir.chdir(File.join(spec.dir, 'third_party', yaml_base_dir)) {
+        run_command({}, "./bootstrap")
+      }
+
+      FileUtils.cp_r File.join(spec.dir, 'third_party', yaml_base_dir), build_dir
     end
 
     if ! File.exists? "#{yaml_dir}/build/lib/libyaml.a"

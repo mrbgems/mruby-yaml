@@ -28,6 +28,13 @@ else
 end
 ```
 
+### Getting libyaml
+
+If you have a compiled version of `libyaml` available on your system, you can use it by setting the environment variable `MRUBY_YAML_USE_SYSTEM_LIBRARY` to a non-empty value and ensuring your compiler can find the library.
+
+Otherwise, Rake will attempt to compile it from sources obtained from the offical `libyaml` GitHub repository.  This requires that you have `autoconf` installed.
+
+
 ### Documentation
 
 #### `YAML.load(yaml_str)`
