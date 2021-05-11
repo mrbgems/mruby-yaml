@@ -31,11 +31,11 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
 
       # But first, we generate the configure script. This requires GNU
       # autoconf to be installed.
-      Dir.chdir(File.join(spec.dir, 'third_party', yaml_base_dir)) {
+      Dir.chdir(File.join(spec.dir, 'vendor', yaml_base_dir)) {
         run_command({}, "./bootstrap")
       }
 
-      FileUtils.cp_r File.join(spec.dir, 'third_party', yaml_base_dir), build_dir
+      FileUtils.cp_r File.join(spec.dir, 'vendor', yaml_base_dir), build_dir
     end
 
     if ! File.exists? "#{yaml_dir}/build/lib/libyaml.a"
