@@ -20,26 +20,25 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
   use_system_library = ENV.fetch('MRUBY_YAML_USE_SYSTEM_LIBRARY', '') != ''
 
   unless use_system_library
-    yaml_base_dir = "libyaml"
-    yaml_dir = File.join(build_dir, yaml_base_dir)
+    yaml_dir = File.join(build_dir, 'libyaml')
+    yaml_base_dir = File.join(spec.dir, 'vendor', 'libyaml')
 
     FileUtils.mkdir_p build_dir
 
     # We build libyaml in the gem's build directory, which means
     # copying the sources from the repo.
-    if ! File.exists? "#{yaml_dir}"
-
+    unless File.exists?(yaml_dir)
       # But first, we generate the configure script. This requires GNU
       # autoconf to be installed.
-      Dir.chdir(File.join(spec.dir, 'vendor', yaml_base_dir)) {
-        run_command({}, "./bootstrap")
-      }
+      Dir.chdir(yaml_base_dir) do
+        run_command({}, './bootstrap')
+      end
 
-      FileUtils.cp_r File.join(spec.dir, 'vendor', yaml_base_dir), build_dir
+      FileUtils.cp_r(yaml_base_dir, build_dir)
     end
 
-    if ! File.exists? "#{yaml_dir}/build/lib/libyaml.a"
-      Dir.chdir yaml_dir do
+    unless File.exists?("#{yaml_dir}/build/lib/libyaml.a")
+      Dir.chdir(yaml_dir) do
         e = {
           'CC' => "#{spec.build.cc.command} #{spec.build.cc.flags.join(' ')}",
           'CXX' => "#{spec.build.cxx.command} #{spec.build.cxx.flags.join(' ')}",
