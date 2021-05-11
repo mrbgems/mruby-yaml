@@ -3,11 +3,7 @@ on: [push, pull_request]
 jobs:
   gcc:
     env:
-      # 'set-env' has been disabled by default because it's a
-      # potential security issue.  See https://github.blog/changelog/2020-10-01-github-actions-deprecating-set-env-and-add-path-commands/.
-      # We re-enable it here for now because the problem does not
-      # appear to affect us.
-      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+      MRUBY_BUILD: ../.github/build_config.rb
     runs-on: ubuntu-latest
     steps:
       - name: Install libraries
@@ -17,8 +13,6 @@ jobs:
         uses: actions/checkout@v1.0.0
         with:
           fetch-depth: 10
-      - name: Set MRUBY_BUILD
-        run: echo '##[set-env name=MRUBY_BUILD]../.github/build_config.rb'
       - name: Clone mruby
         run: git clone --depth=1 --branch=2.0.1 https://github.com/mruby/mruby
       - name: Build
