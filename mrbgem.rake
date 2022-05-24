@@ -27,7 +27,7 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
 
     # We build libyaml in the gem's build directory, which means
     # copying the sources from the repo.
-    unless File.exists?(yaml_dir)
+    unless File.exist?(yaml_dir)
       # But first, we generate the configure script. This requires GNU
       # autoconf to be installed.
       Dir.chdir(yaml_base_dir) do
@@ -37,7 +37,7 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
       FileUtils.cp_r(yaml_base_dir, build_dir)
     end
 
-    unless File.exists?("#{yaml_dir}/build/lib/libyaml.a")
+    unless File.exist?("#{yaml_dir}/build/lib/libyaml.a")
       Dir.chdir(yaml_dir) do
         e = {
           'CC' => "#{spec.build.cc.command} #{spec.build.cc.flags.join(' ')}",
