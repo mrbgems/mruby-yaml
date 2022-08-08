@@ -5,21 +5,24 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
   spec.description = 'YAML gem for mruby'
   spec.homepage = 'https://github.com/mrbgems/mruby-yaml'
 
-  spec.linker.libraries << 'yaml'
-
-  require 'open3'
-  def run_command env, command
-    STDOUT.sync = true
-    puts "build: [exec] #{command}"
-    Open3.popen2e(env, command) do |stdin, stdout, thread|
-      print stdout.read
-      fail "#{command} failed" if thread.value != 0
-    end
+  # Workaround for https://github.com/ziglang/zig/issues/4986
+  use_zig = spec.build.cc.command.start_with?('zig ')
+  unless use_zig
+    spec.linker.libraries << 'yaml'
   end
 
   use_system_library = ENV.fetch('MRUBY_YAML_USE_SYSTEM_LIBRARY', '') != ''
-
   unless use_system_library
+    require 'open3'
+    def run_command env, command
+      STDOUT.sync = true
+      puts "build: [exec] #{command}"
+      Open3.popen2e(env, command) do |stdin, stdout, thread|
+        print stdout.read
+        fail "#{command} failed" if thread.value != 0
+      end
+    end
+
     yaml_dir = File.join(build_dir, 'libyaml')
     yaml_base_dir = File.join(spec.dir, 'vendor', 'libyaml')
 
@@ -64,6 +67,10 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
     end
 
     spec.cc.include_paths << "#{yaml_dir}/build/include"
-    spec.linker.library_paths << "#{yaml_dir}/build/lib/"
+    if use_zig
+      spec.linker.flags << "#{yaml_dir}/build/lib/libyaml.a"
+    else
+      spec.linker.library_paths << "#{yaml_dir}/build/lib/"
+    end
   end
 end
