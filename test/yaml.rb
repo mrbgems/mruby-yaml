@@ -77,6 +77,10 @@ assert('YAML load fixnum') do
   assert_equal 5, YAML.load('5')
 end
 
+assert('YAML load fixnum with underscore') do
+  assert_equal 123456, YAML.load('123_456')
+end
+
 assert('YAML load fixnum as string') do
   assert_equal '5', YAML.load('"5"')
 end

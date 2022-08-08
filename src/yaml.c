@@ -155,6 +155,28 @@ void raise_parser_problem(mrb_state *mrb, yaml_parser_t *parser)
     problem_str, problem_line, problem_col);
 }
 
+// Parse 123_456 as 123456
+static long long
+parse_yaml_int(const char *str, char *is_int)
+{
+  *is_int = 0;
+  long long num = 0;
+  if (strlen(str) == 0) return num;
+
+  for (int i = 0; i < strlen(str); i++) {
+    if (0 < i && i < strlen(str) - 1 && str[i] == '_') continue;
+    if ('0' <= str[i] && str[i] <= '9') {
+      num *= 10;
+      num += str[i] - '0';
+    } else {
+      return num; // not integer
+    }
+  }
+
+  *is_int = 1;
+  return num;
+}
+
 mrb_value
 node_to_value_with_aliases(mrb_state *mrb,
   yaml_document_t *document, yaml_node_t *node, int use_scalar_aliases)
@@ -215,8 +237,9 @@ node_to_value_with_aliases(mrb_state *mrb,
         }
 
         /* Check if it is a Fixnum */
-        ll = strtoll(str, &endptr, 0);
-        if (str != endptr && *endptr == '\0')
+        char is_int;
+        ll = parse_yaml_int(str, &is_int);
+        if (is_int)
           return mrb_fixnum_value(ll);
 
         /* Check if it is a Float */
