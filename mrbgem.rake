@@ -51,14 +51,19 @@ MRuby::Gem::Specification.new('mruby-yaml') do |spec|
         }
 
         configure_opts = %w(--prefix=$PREFIX --enable-static --disable-shared)
-        if build.kind_of?(MRuby::CrossBuild) && build.host_target && build.build_target
-          configure_opts += %W(--host #{spec.build.host_target} --build #{spec.build.build_target})
+        if build.kind_of?(MRuby::CrossBuild)
+          if build.host_target
+            configure_opts += %W(--host #{spec.build.host_target})
+          end
+          if build.build_target
+            configure_opts += %W(--build #{spec.build.build_target})
+          end
+
           if %w(x86_64-w64-mingw32 i686-w64-mingw32).include?(build.host_target)
             e["CFLAGS"] = "-DYAML_DECLARE_STATIC"
+            e['LD'] = "#{build.host_target}-ld #{spec.build.linker.flags.join(' ')}"
             spec.cc.flags << "-DYAML_DECLARE_STATIC"
           end
-          e['LD'] = "x86_64-w64-mingw32-ld #{spec.build.linker.flags.join(' ')}" if build.host_target == 'x86_64-w64-mingw32'
-          e['LD'] = "i686-w64-mingw32-ld #{spec.build.linker.flags.join(' ')}" if build.host_target == 'i686-w64-mingw32'
         end
         run_command e, "./configure #{configure_opts.join(" ")}"
         run_command e, "make"
