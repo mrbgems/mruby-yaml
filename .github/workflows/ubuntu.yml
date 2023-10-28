@@ -2,19 +2,35 @@ name: ubuntu
 on: [push, pull_request]
 jobs:
   gcc:
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - '2.0.1'
+          - '2.1.2'
+          - '3.0.0'
+          - '3.1.0'
+          - '3.2.0'
     env:
-      MRUBY_BUILD: ../.github/build_config.rb
+      MRUBY_CONFIG: ../.github/build_config.rb
     runs-on: ubuntu-latest
     steps:
       - name: Install libraries
         run: |
           sudo apt-get install rake bison git gperf libonig-dev
       - name: Checkout
-        uses: actions/checkout@v1.0.0
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 10
+          submodules: true
       - name: Clone mruby
-        run: git clone --depth=1 --branch=2.0.1 https://github.com/mruby/mruby
+        run: git clone --depth=1 --branch=${{ matrix.version }} https://github.com/mruby/mruby
+      - name: Workaround for Ruby 3.0 build failure
+        if: ${{ matrix.version == '2.0.1' }}
+        run: |
+          # See also:
+          # https://github.com/mruby/mruby/commit/26e6e75ba6a59bc77c80a6ce5d207626cfed91a6
+          # https://www.ruby-lang.org/en/news/2019/12/12/separation-of-positional-and-keyword-arguments-in-ruby-3-0/
+          sed -i -E 's@, opts$@@' mruby/Rakefile
       - name: Build
         run: cd mruby && make all
       - name: Test
